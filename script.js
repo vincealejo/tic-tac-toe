@@ -1,16 +1,23 @@
 const TICTACTOE = (function() {
     const playerOne = createPlayer("player one", "o");
     const playerTwo = createPlayer("player two", "x");
-    const gameboard = [
-        ["","",""],
-        ["","",""],
-        ["","",""],
+    let gameboard = [
+        [null,null,null],
+        [null,null,null],
+        [null,null,null],
     ];
 
     let turn = 1;
-    let winner = "";
+    let isGameOver = false;
 
     function move(posX, posY) {
+        if(isGameOver) return false;
+        // prvent from marking already marked spot
+        if(gameboard[posX][posY] !== null) {
+            return false;
+        };
+        
+        
         let player;
         if(turn === 1) {
             player = playerOne;
@@ -18,12 +25,21 @@ const TICTACTOE = (function() {
             player = playerTwo;
         }
         
-        // prvent from marking already marked spot
-        if(gameboard[posX][posY]) return;
-
         mark(player.marker, posX, posY);
-        winner = assignWinner(player.marker);
+        isGameOver = checkForWinner(player.marker);
+        if(isGameOver) {
+           alert(`Winner: ${getCurrentPlayer().name}`);
+            return false;
+        }
+
         changeTurn();
+
+        return true;
+    }
+
+    function getCurrentPlayer() {
+        if(turn === 1) return playerOne;
+        return playerTwo;
     }
 
     // PRIVATE FUNCTIONS
@@ -39,7 +55,8 @@ const TICTACTOE = (function() {
         gameboard[posX][posY] = marker;
     }
 
-    function assignWinner(marker ) {
+    function checkForWinner(marker) {
+        let winner = false;
         const winningPositions = [
             ["00","01","02"],
             ["10","11","12"],
@@ -59,9 +76,10 @@ const TICTACTOE = (function() {
             const c1 = pos[2][0];
             const c2 = pos[2][1];
             if(gameboard[a1][a2] === marker && gameboard[b1][b2] === marker && gameboard[c1][c2] === marker) {
-                console.log(`Winner: ${marker}`);
-            }
+                winner = true;
+            }   
         });
+         return winner;
     }
 
     
@@ -73,8 +91,42 @@ const TICTACTOE = (function() {
         }
     }
 
+    function reset() {
+        gameboard = [
+            [null,null,null],
+            [null,null,null],
+            [null,null,null],
+        ];
+        turn = 1;
+    }
+
 
     return {
-        move
+        move, getCurrentPlayer
     }
 })();
+
+const GAME = (function() {
+    const board = document.querySelector(".board");
+
+
+    board.addEventListener("click", (e) => {
+        if(e.target.className !== "square") return;
+        const square = e.target;
+        const x = square.dataset.posX;
+        const y = square.dataset.posY;
+        const currentPlayer = TICTACTOE.getCurrentPlayer();
+        const moveSuccessfully = TICTACTOE.move(x, y);
+        if(moveSuccessfully) {
+            markSquare(currentPlayer.marker,square);
+        }
+    })
+
+
+    // TOOLS
+    function markSquare(marker, square) {
+        square.innerText = marker;
+    }
+
+
+})()
