@@ -47,3 +47,31 @@ header {
         padding: 0.3em 0.75em;
     }
 }
+
+.board {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+
+    .squares {
+        --size: 275px;
+        width: var(--size);
+        height: var(--size);
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        grid-template-rows: repeat(3,1fr);
+        gap: 2px;
+
+        div {
+            border: 2px solid;
+            border-radius: 8px;
+            font-size: 64px;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}

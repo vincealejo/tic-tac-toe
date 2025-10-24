@@ -14,8 +14,9 @@ const TIC_TAC_TOE = (() => {
     }
 
     function move(x, y) {
-        if(board[x][y] !== null) return;
+        if(board[x][y] !== null) return "invalid move";
         board[x][y] = playerInTurn.marker;
+        console.log(board)
         const result = check();
         changeTurn();
 
@@ -24,6 +25,10 @@ const TIC_TAC_TOE = (() => {
 
     function createPlayer(name, marker) {
         return { name, marker }
+    }
+
+    function getPlayerInTurn() {
+        return playerInTurn;
     }
 
     function changeTurn() {
@@ -60,9 +65,9 @@ const TIC_TAC_TOE = (() => {
             const squareThree = board[c1][c2];
             
             if(squareOne === playerInTurn.marker && squareTwo === playerInTurn.marker && squareThree === playerInTurn.marker) {
-    
                 result.isGameOver = true;
                 result.winner = playerInTurn;
+               
             }
         }
 
@@ -71,12 +76,13 @@ const TIC_TAC_TOE = (() => {
 
 
     return {
-        createPlayer, setPlayers, move
+        createPlayer, setPlayers, move, getPlayerInTurn
     }
 })();
 
 (function game() {
     const menuModal = document.querySelector(".menu-modal");
+    const boardEl = document.querySelector(".board");
     const playerOneNameInput = document.querySelector("#player-one-name");
     const playerTwoNameInput = document.querySelector("#player-two-name");
     const startButton = document.querySelector(".start-button");
@@ -90,19 +96,37 @@ const TIC_TAC_TOE = (() => {
         const pTwoName = playerTwoNameInput.value;
         playerOne = TIC_TAC_TOE.createPlayer(pOneName, "o");
         playerTwo = TIC_TAC_TOE.createPlayer(pTwoName, "x");
-        console.log(playerOne, playerTwo);
-        menuModal.classList.add("hidden")
+        TIC_TAC_TOE.setPlayers(playerOne, playerTwo);
+        switchScreen(menuModal, boardEl);
     })
-    
-    playerOne = TIC_TAC_TOE.createPlayer("one", "o");
-    playerTwo = TIC_TAC_TOE.createPlayer("two", "x");
 
-    TIC_TAC_TOE.setPlayers(playerOne, playerTwo);
-    TIC_TAC_TOE.move(1, 0);
-    TIC_TAC_TOE.move(0, 0);
-    TIC_TAC_TOE.move(2, 0);
-    TIC_TAC_TOE.move(1, 1);
-    TIC_TAC_TOE.move(1, 2);
-    const res = TIC_TAC_TOE.move(2, 2);
-    console.log(res);
+    boardEl.addEventListener("click", (e) => {
+        if(e.target.classList.contains("square")) {
+            const x = e.target.dataset.posX;
+            const y = e.target.dataset.posY;
+
+            const playerInTurn = TIC_TAC_TOE.getPlayerInTurn();
+            const res = TIC_TAC_TOE.move(x, y);
+
+            if(res === "invalid move") return;
+            e.target.style.color = setColor(playerInTurn.marker);
+            e.target.innerText = playerInTurn.marker;
+        }
+    })
+
+
+    // tools
+    function switchScreen(current, target) {
+        current.classList.add("hidden");
+        target.classList.remove("hidden");
+    }
+
+    function setColor(marker) {
+        if(marker === "o") {
+            return "#3f3fdf";
+        } else {
+            return "#df3f87";
+        };
+    }
+
 })()
