@@ -9,17 +9,36 @@
 </head>
 <body>
     <div class="wrapper">
-        <div class="board">
-            <div class="square" data-pos-x="0" data-pos-y="0"></div>
-            <div class="square" data-pos-x="0" data-pos-y="1"></div>
-            <div class="square" data-pos-x="0" data-pos-y="2"></div>
-            <div class="square" data-pos-x="1" data-pos-y="0"></div>
-            <div class="square" data-pos-x="1" data-pos-y="1"></div>
-            <div class="square" data-pos-x="1" data-pos-y="2"></div>
-            <div class="square" data-pos-x="2" data-pos-y="0"></div>
-            <div class="square" data-pos-x="2" data-pos-y="1"></div>
-            <div class="square" data-pos-x="2" data-pos-y="2"></div>
-        </div>
+        <header>
+            <h1>Tic Tac Toe</h1>
+        </header>
+        <main>
+            <form action="#" class="menu-modal">
+                <label for="player-one-name">
+                    <span>Player One (o)</span>
+                    <input type="text" name="name" id="player-one-name">
+                </label>
+                <label for="player-one-name">
+                    <span>Player Two (x)</span>
+                    <input type="text" name="name" id="player-two-name">
+                </label>
+                <button class="start-button">Start</button>
+            </form>
+            <div class="board">
+                <button class="reset-button">Reset</button>
+                <div class="squares">
+                    <div class="square" data-pos-x="0" data-pos-y="0"></div>
+                    <div class="square" data-pos-x="0" data-pos-y="1"></div>
+                    <div class="square" data-pos-x="0" data-pos-y="2"></div>
+                    <div class="square" data-pos-x="1" data-pos-y="0"></div>
+                    <div class="square" data-pos-x="1" data-pos-y="1"></div>
+                    <div class="square" data-pos-x="1" data-pos-y="2"></div>
+                    <div class="square" data-pos-x="2" data-pos-y="0"></div>
+                    <div class="square" data-pos-x="2" data-pos-y="1"></div>
+                    <div class="square" data-pos-x="2" data-pos-y="2"></div>
+                </div>
+            </div>
+        </main>
     </div>
     <script src="script.js"></script>
 </body>

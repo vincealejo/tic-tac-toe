@@ -1,132 +1,108 @@
-const TICTACTOE = (function() {
-    const playerOne = createPlayer("player one", "o");
-    const playerTwo = createPlayer("player two", "x");
-    let gameboard = [
-        [null,null,null],
-        [null,null,null],
-        [null,null,null],
-    ];
+const TIC_TAC_TOE = (() => {
+    let board = [
+        [null, null, null],
+        [null, null, null],
+        [null, null, null],
+    ]
+    const players = { one: null, two: null };
+    let playerInTurn = null;
 
-    let turn = 1;
-    let isGameOver = false;
+    function setPlayers(playerOne, playerTwo) {
+        players.one = playerOne;
+        players.two = playerTwo;
+        playerInTurn = players.one;
+    }
 
-    function move(posX, posY) {
-        if(isGameOver) return false;
-        // prvent from marking already marked spot
-        if(gameboard[posX][posY] !== null) {
-            return false;
-        };
-        
-        
-        let player;
-        if(turn === 1) {
-            player = playerOne;
-        } else {
-            player = playerTwo;
-        }
-        
-        mark(player.marker, posX, posY);
-        isGameOver = checkForWinner(player.marker);
-        if(isGameOver) {
-           alert(`Winner: ${getCurrentPlayer().name}`);
-            return false;
-        }
-
+    function move(x, y) {
+        if(board[x][y] !== null) return;
+        board[x][y] = playerInTurn.marker;
+        const result = check();
         changeTurn();
 
-        return true;
+        return result;
     }
 
-    function getCurrentPlayer() {
-        if(turn === 1) return playerOne;
-        return playerTwo;
-    }
-
-    // PRIVATE FUNCTIONS
-    function changeTurn() {
-        if(turn === 1) {
-            turn = 2;
-        } else {
-            turn = 1;
-        }
-    }
-
-    function mark(marker, posX, posY) {
-        gameboard[posX][posY] = marker;
-    }
-
-    function checkForWinner(marker) {
-        let winner = false;
-        const winningPositions = [
-            ["00","01","02"],
-            ["10","11","12"],
-            ["20","21","22"],
-            ["00","11","22"],
-            ["02","11","20"],
-            ["00","10","20"],
-            ["01","11","21"],
-            ["02","12","22"],
-        ]
-
-        winningPositions.forEach((pos) => {
-            const a1 = pos[0][0];
-            const a2 = pos[0][1];
-            const b1 = pos[1][0];
-            const b2 = pos[1][1];
-            const c1 = pos[2][0];
-            const c2 = pos[2][1];
-            if(gameboard[a1][a2] === marker && gameboard[b1][b2] === marker && gameboard[c1][c2] === marker) {
-                winner = true;
-            }   
-        });
-         return winner;
-    }
-
-    
     function createPlayer(name, marker) {
-        return {
-            name,
-            score: 0,
-            marker
+        return { name, marker }
+    }
+
+    function changeTurn() {
+        if(playerInTurn.marker === "o") {
+            playerInTurn = players.two;
+        }else {
+            playerInTurn = players.one;
         }
     }
 
-    function reset() {
-        gameboard = [
-            [null,null,null],
-            [null,null,null],
-            [null,null,null],
+    function check() {
+        const result = {isGameOver: false, winner: null};
+        const combos = [
+            ["00", "01", "02"],
+            ["10", "11", "12"],
+            ["20", "21", "22"],
+            ["00", "10", "20"],
+            ["01", "11", "21"],
+            ["02", "12", "22"],
+            ["00", "11", "22"],
+            ["02", "11", "20"],
         ];
-        turn = 1;
+
+
+        for (let i = 0; i < combos.length; i++) {
+            const a1 = combos[i][0][0];
+            const a2 = combos[i][0][1];
+            const b1 = combos[i][1][0];
+            const b2 = combos[i][1][1];
+            const c1 = combos[i][2][0];
+            const c2 = combos[i][2][1];            
+            const squareOne = board[a1][a2];
+            const squareTwo = board[b1][b2];
+            const squareThree = board[c1][c2];
+            
+            if(squareOne === playerInTurn.marker && squareTwo === playerInTurn.marker && squareThree === playerInTurn.marker) {
+    
+                result.isGameOver = true;
+                result.winner = playerInTurn;
+            }
+        }
+
+        return result;
     }
 
 
     return {
-        move, getCurrentPlayer
+        createPlayer, setPlayers, move
     }
 })();
 
-const GAME = (function() {
-    const board = document.querySelector(".board");
+(function game() {
+    const menuModal = document.querySelector(".menu-modal");
+    const playerOneNameInput = document.querySelector("#player-one-name");
+    const playerTwoNameInput = document.querySelector("#player-two-name");
+    const startButton = document.querySelector(".start-button");
 
+    let playerOne;
+    let playerTwo;
 
-    board.addEventListener("click", (e) => {
-        if(e.target.className !== "square") return;
-        const square = e.target;
-        const x = square.dataset.posX;
-        const y = square.dataset.posY;
-        const currentPlayer = TICTACTOE.getCurrentPlayer();
-        const moveSuccessfully = TICTACTOE.move(x, y);
-        if(moveSuccessfully) {
-            markSquare(currentPlayer.marker,square);
-        }
+    startButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        const pOneName = playerOneNameInput.value;
+        const pTwoName = playerTwoNameInput.value;
+        playerOne = TIC_TAC_TOE.createPlayer(pOneName, "o");
+        playerTwo = TIC_TAC_TOE.createPlayer(pTwoName, "x");
+        console.log(playerOne, playerTwo);
+        menuModal.classList.add("hidden")
     })
+    
+    playerOne = TIC_TAC_TOE.createPlayer("one", "o");
+    playerTwo = TIC_TAC_TOE.createPlayer("two", "x");
 
-
-    // TOOLS
-    function markSquare(marker, square) {
-        square.innerText = marker;
-    }
-
-
+    TIC_TAC_TOE.setPlayers(playerOne, playerTwo);
+    TIC_TAC_TOE.move(1, 0);
+    TIC_TAC_TOE.move(0, 0);
+    TIC_TAC_TOE.move(2, 0);
+    TIC_TAC_TOE.move(1, 1);
+    TIC_TAC_TOE.move(1, 2);
+    const res = TIC_TAC_TOE.move(2, 2);
+    console.log(res);
 })()
