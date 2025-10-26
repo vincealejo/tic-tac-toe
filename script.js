@@ -16,7 +16,6 @@ const TIC_TAC_TOE = (() => {
     function move(x, y) {
         if(board[x][y] !== null) return "invalid move";
         board[x][y] = playerInTurn.marker;
-        console.log(board)
         const result = check();
         changeTurn();
 
@@ -51,7 +50,15 @@ const TIC_TAC_TOE = (() => {
             ["00", "11", "22"],
             ["02", "11", "20"],
         ];
-
+        
+        let markedCount = 0;
+        board.forEach((row) => {
+            row.forEach((sqr) => {
+                if(sqr !== null) {
+                    markedCount++;
+                }
+            })
+        })
 
         for (let i = 0; i < combos.length; i++) {
             const a1 = combos[i][0][0];
@@ -67,16 +74,32 @@ const TIC_TAC_TOE = (() => {
             if(squareOne === playerInTurn.marker && squareTwo === playerInTurn.marker && squareThree === playerInTurn.marker) {
                 result.isGameOver = true;
                 result.winner = playerInTurn;
-               
             }
+
         }
 
+        if(markedCount === 9 && result.winner === null) {
+            result.isGameOver = true;
+            result.winner = "draw";
+        }
+
+
+    
         return result;
     }
 
+    function reset() {
+        for(let i = 0; i < board.length; i++) {
+            for(let j = 0; j < board[i].length; j++) {
+                board[i][j] = null;
+            }
+        }
+        playerInTurn = players.one;
+
+    }
 
     return {
-        createPlayer, setPlayers, move, getPlayerInTurn
+        createPlayer, setPlayers, move, getPlayerInTurn, reset
     }
 })();
 
@@ -86,14 +109,22 @@ const TIC_TAC_TOE = (() => {
     const playerOneNameInput = document.querySelector("#player-one-name");
     const playerTwoNameInput = document.querySelector("#player-two-name");
     const startButton = document.querySelector(".start-button");
+    const gameOverScreen = document.querySelector(".gameover-screen");
+    const playAgainButton = document.querySelector(".play-again-button");
 
     let playerOne;
     let playerTwo;
+    let isGameover = false;
 
     startButton.addEventListener("click", (e) => {
         e.preventDefault();
-        const pOneName = playerOneNameInput.value;
-        const pTwoName = playerTwoNameInput.value;
+        let pOneName = playerOneNameInput.value;
+        let pTwoName = playerTwoNameInput.value;
+        
+        // default names if the user didn't input names
+        if(pOneName === "") pOneName = "Player One";
+        if(pTwoName === "") pTwoName = "Player Two";
+
         playerOne = TIC_TAC_TOE.createPlayer(pOneName, "o");
         playerTwo = TIC_TAC_TOE.createPlayer(pTwoName, "x");
         TIC_TAC_TOE.setPlayers(playerOne, playerTwo);
@@ -102,6 +133,8 @@ const TIC_TAC_TOE = (() => {
 
     boardEl.addEventListener("click", (e) => {
         if(e.target.classList.contains("square")) {
+            if(isGameover) return;
+
             const x = e.target.dataset.posX;
             const y = e.target.dataset.posY;
 
@@ -109,15 +142,28 @@ const TIC_TAC_TOE = (() => {
             const res = TIC_TAC_TOE.move(x, y);
 
             if(res === "invalid move") return;
-            e.target.style.color = setColor(playerInTurn.marker);
-            e.target.innerText = playerInTurn.marker;
+            markSquare(e.target, playerInTurn.marker);
+
+            if(res.isGameOver) {
+                showWinner(res.winner); 
+                isGameover = true;
+            }
         }
+    })
+
+    playAgainButton.addEventListener("click", () => {
+        TIC_TAC_TOE.reset();
+        isGameover = false;
+        resetSquares();
+        switchScreen(gameOverScreen, boardEl);
     })
 
 
     // tools
     function switchScreen(current, target) {
-        current.classList.add("hidden");
+        if(current !== "") {
+            current.classList.add("hidden");
+        }
         target.classList.remove("hidden");
     }
 
@@ -127,6 +173,30 @@ const TIC_TAC_TOE = (() => {
         } else {
             return "#df3f87";
         };
+    }
+
+    function showWinner(player) {
+        const winnerName = document.querySelector(".winner-name");
+        switchScreen("", gameOverScreen);
+        // if player.name is undefined it means the game is draw
+        if(player.name === undefined) {
+            winnerName.innerText = player.toUpperCase() + "!!";
+        } else {
+            winnerName.innerText = player.name + " Wins!!";
+        }
+    }
+
+    function markSquare(square, marker) {
+        square.style.color = setColor(marker);
+        square.style.borderColor = setColor(marker);
+        square.innerText = marker;
+    }
+
+    function resetSquares() {
+        [...boardEl.childNodes[1].children].forEach((square, idx) => {
+            square.innerText = "";
+            square.style.border = "2px solid #333";
+        })
     }
 
 })()
